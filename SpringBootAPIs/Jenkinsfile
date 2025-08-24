@@ -11,6 +11,7 @@ pipeline {
 
   environment {
     // SONAR_URL = "http://52.66.196.155:9000"
+     SONARQUBE_SERVER = 'sonarqube'
     GIT_REPO_NAME = "SpringBoot_Jenkins"
     GIT_USER_NAME = "Ganesh31088500"
     DOCKER_IMAGE = "ganeshpitchuka3108/ultimate-cicd:${BUILD_NUMBER}"
@@ -52,7 +53,22 @@ stage('Build & Test (Maven)') {
 }
 
 
-
+stage('SonarQube Analysis') {
+  steps {
+    withCredentials([string(credentialsId: 'sonar-token-id', variable: 'SONAR_AUTH_TOKEN')]) {
+      withSonarQubeEnv("${SONARQUBE_SERVER}") {
+        dir('SpringBootAPIs') {
+          sh """
+            mvn sonar:sonar \
+              -Dsonar.projectKey=springboot-app \
+              -Dsonar.host.url=${SONAR_HOST_URL} \
+              -Dsonar.login=${SONAR_AUTH_TOKEN}
+          """
+        }
+      }
+    }
+  }
+}
 
 
 
