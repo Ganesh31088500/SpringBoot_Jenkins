@@ -43,30 +43,35 @@ stage('Cleanup') {
     }
 
 
-    stage('Build & Test (Maven)') {
-      steps {
-        sh 'mvn -B -DskipTests=false clean package'
-      }
+stage('Build & Test (Maven)') {
+  steps {
+    dir('SpringBootAPIs') { // ⬅️ navigate into the subdirectory
+      sh 'mvn -B -DskipTests=false clean package'
     }
+  }
+}
 
 
 
 
 
 
-    stage('Build and Push Docker Image') {
-      steps {
-        script {
-          sh """
-            docker build -t ${DOCKER_IMAGE} .
-          """
-          def dockerImage = docker.image("${DOCKER_IMAGE}")
-          docker.withRegistry('https://index.docker.io/v1/', "dockerhub-creds-id") {
-            dockerImage.push()
-          }
+stage('Build and Push Docker Image') {
+  steps {
+    script {
+      dir('SpringBootAPIs') {
+        sh """
+          docker build -t ${DOCKER_IMAGE} .
+        """
+        def dockerImage = docker.image("${DOCKER_IMAGE}")
+        docker.withRegistry('https://index.docker.io/v1/', "dockerhub-creds-id") {
+          dockerImage.push()
         }
       }
     }
+  }
+}
+
 
 
   }
