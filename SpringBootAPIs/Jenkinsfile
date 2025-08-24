@@ -11,7 +11,7 @@ pipeline {
 
   environment {
     // SONAR_URL = "http://52.66.196.155:9000"
-     SONARQUBE_SERVER = 'sonarqube'
+     SONARQUBE_SERVER = "SonarQube"
     GIT_REPO_NAME = "SpringBoot_Jenkins"
     GIT_USER_NAME = "Ganesh31088500"
     DOCKER_IMAGE = "ganeshpitchuka3108/ultimate-cicd:${BUILD_NUMBER}"
