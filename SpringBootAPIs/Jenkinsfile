@@ -1,0 +1,73 @@
+pipeline {
+  agent any // a node with Docker installed
+  tools {
+    jdk 'jdk17' // Configure in Manage Jenkins > Tools (name must match)
+    maven 'maven3' // Configure in Manage Jenkins > Tools (name must match)
+  }
+  options {
+    skipDefaultCheckout(true)
+    timestamps()
+  }
+
+  environment {
+    // SONAR_URL = "http://52.66.196.155:9000"
+    GIT_REPO_NAME = "jenkins_project"
+    GIT_USER_NAME = "Ganesh31088500"
+    DOCKER_IMAGE = "ganeshpitchuka3108/ultimate-cicd:${BUILD_NUMBER}"
+    PATH = "/usr/share/maven/bin:/usr/bin:/bin" // Optional: ensures mvn is available
+  }
+
+  stages {
+    stage('Debug agent') {
+      steps {
+       sh '''
+            echo "Inside the custom jenkins docker agent"
+whoami
+mvn -v
+docker --version
+git --version
+'''
+      }
+    }
+stage('Cleanup') {
+  steps {
+    cleanWs()
+  }
+}
+
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+
+    stage('Build & Test (Maven)') {
+      steps {
+        sh 'mvn -B -DskipTests=false clean package'
+      }
+    }
+
+
+
+
+
+
+    stage('Build and Push Docker Image') {
+      steps {
+        script {
+          sh """
+            docker build -t ${DOCKER_IMAGE} .
+          """
+          def dockerImage = docker.image("${DOCKER_IMAGE}")
+          docker.withRegistry('https://index.docker.io/v1/', "dockerhub-creds-id") {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+
+
+  }
+}
