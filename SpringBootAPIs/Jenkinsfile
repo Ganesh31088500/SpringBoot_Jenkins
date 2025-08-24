@@ -72,7 +72,20 @@ stage('Build and Push Docker Image') {
   }
 }
 
-
+ stage('Update Deployment File') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+          sh """
+            git config user.email "ganeshpitchuka8@gmail.com"
+            git config user.name "Ganesh31088500"
+            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" SpringManifest/deployment.yml
+            git add SpringManifest/deployment.yml
+            git commit -m "Update deployment image to version ${BUILD_NUMBER}" || true
+            git push https://${GIT_USER}:${GIT_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+          """
+        }
+      }
+    }
 
   }
 }
